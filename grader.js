@@ -77,6 +77,18 @@ var clone = function(fn) {
   return fn.bind({});
 };
 
+function processResult(result){
+  var checkJson = checkUrlFile(result, program.checks);
+  var outJson = JSON.stringify(checkJson, null, 4);
+  console.log(outJson);
+}
+
+function getResult(url){
+  rest.get(url).on('complete', function(result){
+    processResult(result);
+  });
+}
+
 if(require.main == module) {
   program
     .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
@@ -85,11 +97,7 @@ if(require.main == module) {
     .parse(process.argv);
 
   if (program.url) {
-    rest.get(program.url).on('complete', function(result) {
-      var checkJson = checkUrlFile(result, program.checks);
-      var outJson = JSON.stringify(checkJson, null, 4);
-      console.log(outJson);
-    });
+    getResult(program.url);
   }
   else {
     var checkJson = checkHtmlFile(program.file, program.checks);
